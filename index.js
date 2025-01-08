@@ -11,11 +11,16 @@ const siteRoute = require("./routes/site.route.js");
 // Require express for routing
 const express = require("express");
 const app = express();
+const path = require('path');
+
+app.set('view engine', 'pug');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 
 app.use("/api/sites", siteRoute);
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 // **************************************************
 // Require reload for auto development updates
@@ -54,36 +59,11 @@ app.listen(process.env.PORT, () => {
 // Add routes
 app.get("/", (req, res) => {
 
-    res.send("<h1>Hello World!</h1><script src=\"/reload/reload.js\"></script>");
+    res.render('index', {
+        title: 'Home Page',
+      });
 
 });
 
-// **************************************************
-// Sites API routes
-app.get("/api/sites", async (req, res) => {
-    try{
-        const sites = await Site.find({approved: true});
-        res.status(200).json(sites);
-    }catch(error) {
-        res.status(500).json({message: error.message});
-    }
-});
-app.get("/api/sites/:id", async (req, res) => {
-    try{
-        const { id } = req.params;
-        const site = await Site.findById(id);
-        res.status(200).json(site);
-    }catch(error) {
-        res.status(500).json({message: error.message});
-    }
-});
-app.post("/api/sites", async (req, res) => {
-    try{
-        const site = await Site.create(req.body);
-        res.status(200).json(site);
-    }catch(error) {
-        res.status(500).json({message: error.message});
-    }
-});
 
 reload(app);
